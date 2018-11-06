@@ -53,7 +53,7 @@ const handleMessages = (ws) => {
         break;
       case 'BLOCKCHAIN':
         const allBlocks = message.blockchain.filter(add => !blockchain.includes(add));
-        newMessages.forEach((block) => {
+        allBlocks.forEach((block) => {
           blockchain.push(block);
         });
         break;

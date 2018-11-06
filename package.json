@@ -1,0 +1,15 @@
+{
+  "name": "p2p",
+  "version": "1.0.0",
+  "description": "p2p connection for blockchain project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Patryk Szczygło",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "ws": "^5.1.1"
+  }
+}

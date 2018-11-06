@@ -5,7 +5,7 @@ const { createGenesisBlock, getBlockchain, getLatestBlock, createBlock } = requi
 
 const sockets = [];   // Keep all peers connected to our server
 const addresses = []; // Keep addresses of servers
-const blockchain = [];
+var   blockchain = [];
 
 // Keep record of all messages send over the network
 const messages = [];

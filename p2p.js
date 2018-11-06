@@ -1,13 +1,11 @@
 'use strict';
 const WebSocketServer = require('ws').Server;
 const WebSocket = require('ws');
+const { createGenesisBlock, getBlockchain, getLatestBlock, createBlock } = require('./BWchain');
 
-// GLOBALS
-
-// Keep all peers connected to our server
-const sockets = [];
-// Keep addresses of servers
-const addresses = [];
+const sockets = [];   // Keep all peers connected to our server
+const addresses = []; // Keep addresses of servers
+const blockchain = [];
 
 // Keep record of all messages send over the network
 const messages = [];
@@ -23,12 +21,14 @@ const initServer = (port) => {
 const initConnection = (ws, url = null) => {
   sockets.push(ws);
   console.log('Initializing...');
+  
+  blockchain = getBlockchain(); //TODO
 
   handleMessages(ws);
   handleErrors(ws);
   // send information about another servers
   send(ws, { type: 'SOCKETS', addresses });
-  send(ws, { type: 'MESSAGES', messages });
+  send(ws, { type: 'BLOCKCHAIN', blockchain });
   if (url) addresses.push(url);
 };
 
@@ -51,10 +51,10 @@ const handleMessages = (ws) => {
           addNewConnection(con);
         });
         break;
-      case 'MESSAGES':
-        const newMessages = message.messages.filter(add => !messages.includes(add));
-        newMessages.forEach((mes) => {
-          messages.push(mes);
+      case 'BLOCKCHAIN':
+        const allBlocks = message.blockchain.filter(add => !blockchain.includes(add));
+        newMessages.forEach((block) => {
+          blockchain.push(block);
         });
         break;
       default:

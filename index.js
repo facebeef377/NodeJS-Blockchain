@@ -2,6 +2,7 @@ const server = require('http').createServer();
 const express = require('express');
 const app = express();
 const { initServer, addNewConnection, addNewMessage, getSockets, getMessages } = require('./p2p');
+const { createGenesisBlock, getBlockchain, getLatestBlock, createBlock } = require('./BWchain');
 
 app.get('/', (req, res) => {
   const msg = `No. sockets ${getSockets().length}`;
@@ -25,17 +26,31 @@ app.get('/commit', (req, res) => {
   res.redirect('/');
 });
 
+app.get('/block/all', (req, res) => {
+  const blockchain = getBlockchain();
+  res.send(blockchain);
+});
+
+app.get('/block/init', (req, res) => {
+  initChain()
+  res.redirect('/block/all');
+});
+
+app.post('/block/add', (req, res) => {
+  const data = req.query;
+  createBlock(data);
+  res.redirect('/block/all');
+});
+
+const initChain = () => {
+  const data = {
+    transactions: [
+      {data: "Init blockchain!"}
+    ]
+  }
+  createGenesisBlock(data);
+}
+
 initServer(parseInt(process.argv[2]) + 1);
 app.listen(process.argv[2], () => console.log('Listening on http://localhost:' + process.argv[2]));
 
-/*
-USAGE:
-node index.js PORT_NUMBER
-
-In browser:
-Connect peer
-e.g. http://localhost:4443/add?address=http://localhost:4446
-
-Send message:
-e.g. http://localhost:4443/commit?msg=%22Hello%22
-*/

@@ -36,8 +36,9 @@ app.get('/block/init', (req, res) => {
   res.redirect('/block/all');
 });
 
-app.post('/block/add', (req, res) => {
-  const data = req.query;
+app.get('/block/add', (req, res) => {
+  const data = req.query.msg;
+  console.log(req.query.msg);
   createBlock(data);
   res.redirect('/block/all');
 });

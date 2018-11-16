@@ -94,4 +94,4 @@ const addNewBlock = (block) => {
 const getSockets = () => sockets;
 const getMessages = () => messages;
 
-module.exports = { addNewConnection, addNewMessage, initServer, getSockets, getMessages };
+module.exports = { addNewConnection, addNewMessage, initServer, getSockets, getMessages, addNewBlock };

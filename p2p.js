@@ -33,10 +33,7 @@ const initConnection = (ws, url = null) => {
 };
 
 const handleMessages = (ws) => {
-  /*
-  { type: 'MESSAGE', data: string }
-  { type: 'SOCKETS', addresses: array }
-  */
+
   ws.on('message', (data) => {
     const message = JSON.parse(data);
 
@@ -56,6 +53,10 @@ const handleMessages = (ws) => {
         allBlocks.forEach((block) => {
           blockchain.push(block);
         });
+        break;
+      case 'BLOCK':
+        blockchain.push(message.data);
+        console.log('New message');
         break;
       default:
         break;
@@ -84,6 +85,10 @@ const addNewMessage = (msg) => {
   console.log(msg);
   messages.push(msg);
   broadcast({ type: 'MESSAGE', data: msg });
+};
+
+const addNewBlock = (block) => {
+  broadcast({ type: 'BLOCK', data: block });
 };
 
 const getSockets = () => sockets;

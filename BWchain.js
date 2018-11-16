@@ -1,5 +1,6 @@
 'use strict';
 var CryptoJS = require("crypto-js");
+const { initServer, addNewConnection, addNewMessage, getSockets, getMessages } = require('./p2p');
 
 const blockchain = [];
 
@@ -31,6 +32,7 @@ const createBlock = (data) => {
       timestamp: current_time
   }
   blockchain.push(block);
+  addNewBlock(block);
 }
 
 const getBlockchain = () => blockchain;

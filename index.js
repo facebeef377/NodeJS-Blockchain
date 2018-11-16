@@ -1,7 +1,7 @@
 const server = require('http').createServer();
 const express = require('express');
 const app = express();
-const { initServer, addNewConnection, addNewMessage, getSockets, getMessages } = require('./p2p');
+const { initServer, addNewConnection, addNewMessage, getSockets, getMessages, addNewBlock } = require('./p2p');
 const { createGenesisBlock, getBlockchain, getLatestBlock, createBlock } = require('./BWchain');
 
 app.get('/', (req, res) => {
@@ -39,7 +39,8 @@ app.get('/block/init', (req, res) => {
 app.get('/block/add', (req, res) => {
   const data = req.query.msg;
   console.log(req.query.msg);
-  createBlock(data);
+  const block = createBlock(data);
+  addNewBlock(block);
   res.redirect('/block/all');
 });
 

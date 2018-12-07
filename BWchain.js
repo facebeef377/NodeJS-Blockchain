@@ -1,46 +1,90 @@
 'use strict';
 var CryptoJS = require("crypto-js");
 
-const blockchain = [];
-
-const createGenesisBlock = (data) => {
+const createGenesisBlock = () => {
   console.log("Creating Genesis Block!");
-  var current_time = new Date();
-  var hash = calculateHash(0,0,current_time,data.toString());
   var block = {
-      index: 0,
-      hash: hash,
-      data: data,
-      previousHash: 0,
-      timestamp: current_time
+    index: 0,
+    data: {msg:'I am Genesis Block',from:'root'},
+    previousHash: 0,
+    timestamp: 0
   }
-  blockchain.push(block);
+  var hash = calculateHash(block);
+  block.hash = hash;
+  return block;
 };
 
-const createBlock = (data) => {
-  console.log("Creating Block!");
-  var index = blockchain.length;
+const createBlock = (data, previousBlock, login) => {
+  var index = previousBlock.index + 1;
   var current_time = new Date();
-  var previousHash = blockchain[index - 1].hash;
-  var hash = calculateHash(index,previousHash,current_time,data.toString());
+  var previousHash = previousBlock.hash;
   var block = {
-      index: index,
-      hash: hash,
-      data: data,
-      previousHash: previousHash,
-      timestamp: current_time
+    index: index,
+    data: data,
+    previousHash: previousHash,
+    timestamp: current_time,
+    created_by: login
   }
-  blockchain.push(block);
+  var hash = calculateHash(block);
+  block.hash = hash;
   return block;
 }
 
-const getBlockchain = () => blockchain;
-const getLatestBlock = () => blockchain[blockchain.length - 1];
-const getChainSize = () => blockchain.length;
+function checkNewChainIsValid(newChain) {
+  //Is the first block the genesis block?
+  if (calculateHash(newChain[0]) !== createGenesisBlock().hash) {
+    return false;
+  }
+  let previousBlock = newChain[0];
+  let blockIndex = 1;
 
-var calculateHash = (index, previousHash, timestamp, data) => {
-    return CryptoJS.SHA256(index + previousHash + timestamp + data).toString();
+  while (blockIndex < newChain.length) {
+    let block = newChain[blockIndex];
+
+    if (block.previousHash != previousBlock.hash) {
+      console.log(blockIndex);
+      return false;
+    }
+    previousBlock = block;
+    blockIndex++;
+  }
+
+  return true;
+}
+
+function hashIsValid(block) {
+  return (calculateHash(block) == block.hash);
+}
+
+function generateStackDifficulty() {
+  return Math.random()*10;
+}
+
+function checkNewBlockIsValid(block, previousBlock) {
+  if (previousBlock.index + 1 !== block.index) {
+    //Invalid index
+    return false;
+  } else if (previousBlock.hash !== block.previousHash) {
+    //The previous hash is incorrect
+    return false;
+  } else if (!hashIsValid(block)) {
+    //The hash isn't correct
+    return false;
+  }
+
+  return true;
+}
+
+
+
+var calculateHash = (block) => {
+  return CryptoJS.SHA256(block.index + block.previousHash + block.timestamp + block.data.toString()).toString();
 };
 
-module.exports = { createGenesisBlock, getBlockchain, getLatestBlock, createBlock, getChainSize };
-
+module.exports = {
+  createGenesisBlock,
+  createBlock,
+  checkNewChainIsValid,
+  checkNewBlockIsValid,
+  generateStackDifficulty
+};

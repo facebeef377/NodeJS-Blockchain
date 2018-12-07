@@ -1,0 +1,192 @@
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.30.0/sweetalert2.all.min.js"></script>
+  <script>
+    var app = angular.module('app', []);
+    app.controller('mainController',function($scope, $rootScope, $http) {
+      $scope.initVars = function() {
+        console.log("Init!");
+        $scope.getBlockchain();
+        $scope.getSockets();
+        $scope.getLogin();
+        $scope.chceckMasternode()
+      }
+      $scope.blocks = [];
+      $scope.getBlockchain = function() {
+        $http
+          .get("http://localhost:5501/block/all")
+          .then(
+            function (result) {
+                $scope.blocks = result.data;
+            });
+      }
+      $scope.nodes_length = [];
+      $scope.getSockets = function() {
+        $http
+          .get("http://localhost:5501/sockets")
+          .then(
+            function (result) {
+                $scope.nodes_length = result.data.sockets;
+            });
+      }
+      $scope.message = {};
+      $scope.addTx = function() {
+        $http
+          .get("http://localhost:5501/tx/add?msg=" + $scope.message.data)
+          .then(
+            function (result) {
+                console.log(result.data);
+              if(result.data.status == "OK"){
+                Swal(
+                  'Message saved!',
+                  'You added the message!',
+                  'success'
+                )
+                $scope.message = {};
+              }
+            });
+      }
+      $scope.info = {};
+      $scope.getLogin = function() {
+        $http
+          .get("http://localhost:5501/getlogin")
+          .then(
+            function (result) {
+                $scope.info.login = result.data.login;
+            });
+      }
+      $scope.setLogin = function() {
+        $http
+          .get("http://localhost:5501/changelogin?login=" + $scope.info.new_login)
+          .then(
+            function (result) {
+                if(result.data.status == "OK"){
+                Swal(
+                  'Login changed!',
+                  '',
+                  'success'
+                )
+                }
+                  $scope.info.new_login = '';
+                  $scope.getLogin();
+      
+            }
+        )};
+      $scope.chceckMasternode = function() {
+        $http
+          .get("http://localhost:5501/getmaster")
+          .then(
+            function (result) {
+              console.log(result.data);
+              $scope.info.master = result.data.master;
+            }
+        )};
+      $scope.setMaster = function() {
+        $http
+          .get("http://localhost:5501/changepermission?perm=" + $scope.info.login_master)
+          .then(
+            function (result) {
+              console.log(result.data);
+              if(result.data.status == "OK"){
+                Swal(
+                  'Masternode saved!',
+                  '',
+                  'success'
+                )
+                }
+                  $scope.info.login_master = '';
+            }
+        )};
+    })
+  </script>
+</head>
+
+<body class="bg-light" ng-app="app" ng-controller="mainController" ng-init="initVars()">
+
+  <div class="container">
+    <div class="py-5 text-center">
+      <img class="d-block mx-auto mb-4" src="https://seeklogo.com/images/B/blockchain-logo-A0FE252BA6-seeklogo.com.png" alt="" width="72" height="72">
+      <h2>BW-Chain</h2>
+      <p class="lead">Send data or find blocks.</p>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 order-md-2 mb-4">
+        <h4 class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted">Get latest blocks <i class="fas fa-sync-alt" style="cursor: pointer;" ng-click="getBlockchain()"></i></span>
+          <span class="badge badge-secondary badge-pill">{{blocks.length}}</span>
+        </h4>
+        <ul class="list-group mb-3">
+          <li class="list-group-item d-flex justify-content-between lh-condensed" ng-repeat="x in blocks | orderBy : index : true | limitTo: 3">
+            <div>
+              <h6 class="my-0">TX Quantity: {{x.data.length}}</h6>
+              <small class="text-muted">{{x.timestamp | date:'yyyy-MM-dd HH:mm:ss'}}</small>
+            </div>
+            <span class="text-muted">ID: {{x.index}}</span>
+          </li>
+        </ul>
+
+
+
+        <form class="card p-2">
+          <a href="/blocks">
+            <button class="btn btn-primary btn-lg btn-block" type="button">See all blocks</button>
+          </a>
+        </form>
+
+
+        <h4 class="d-flex justify-content-between align-items-center mb-3">
+          <span class="text-muted">Nodes <i class="fas fa-sync-alt" style="cursor: pointer;" ng-click="getSockets()"></i></span>
+          <span class="badge badge-secondary badge-pill">{{nodes_length + 1}}</span>
+        </h4>
+
+      </div>
+      <div class="col-md-8 order-md-1">
+        <h4 class="mb-3">Send message to network</h4>
+        <form class="needs-validation">
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label for="firstName">Your message</label>
+              <textarea ng-model="message.data" type="text" class="form-control"></textarea>
+            </div>
+          </div>
+          <button ng-click="addTx()" class="btn btn-primary btn-lg btn-block" type="button">Send</button>
+          <hr class="mb-4">
+          <h4 class="mb-3">Change login</h4>
+          <label for="cc-name">Current login: <b>{{info.login}}</b></label>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+
+              <input type="text" style="height: 45;" ng-model="info.new_login" class="form-control" placeholder="New login">
+            </div>
+            <div class="col-md-6 mb-3">
+              <button style="height: 45px;" class="btn btn-primary btn-lg btn-block" ng-click="setLogin()" type="button">Set login</button>
+            </div>
+          </div>
+
+          <hr class="mb-4">
+
+          <h4 class="mb-3" ng-if="info.master == '1'">Add new masternode</h4>
+
+          <div class="row" ng-if="info.master == '1'">
+            <div class="col-12 mb-3">
+              <label for="cc-name">Masternode name</label>
+              <input type="text" class="form-control" ng-model="info.login_master">
+            </div>
+          </div>
+          <hr class="mb-4" ng-if="info.master == '1'">
+          <button ng-if="info.master == '1'" ng-click="setMaster()" class="btn btn-primary btn-lg btn-block" type="submit">Add masternode</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
